@@ -1,0 +1,2496 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f766e">
+  <title>Ripartizione Acqua</title>
+
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --primary-light: #ccfbf1;
+      --blue: #0369a1;
+      --red: #b91c1c;
+      --red-light: #fee2e2;
+      --orange: #c2410c;
+      --green: #15803d;
+      --background: #f1f5f9;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #dbe3ec;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(13, 148, 136, 0.14), transparent 30%),
+        var(--background);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #0f766e, #0369a1);
+      color: white;
+      padding: 28px 20px 72px;
+    }
+
+    .topbar-inner {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      border-radius: 17px;
+      font-size: 30px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 36px);
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 28px));
+      margin: -44px auto 50px;
+      position: relative;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.93);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-tab {
+      flex: 1;
+      min-width: max-content;
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 18px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 750;
+      transition: 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      background: #f1f5f9;
+      color: var(--primary);
+    }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 6px 15px rgba(15, 118, 110, 0.25);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      margin-bottom: 18px;
+      padding: 22px;
+      border: 1px solid rgba(219, 227, 236, 0.95);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card-header h2,
+    .card-header h3 {
+      margin: 0 0 5px;
+      letter-spacing: -0.025em;
+    }
+
+    .card-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 750;
+      color: #334155;
+    }
+
+    .field small {
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    input[readonly] {
+      color: #475569;
+      background: #f8fafc;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 10px;
+      font-weight: 750;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      color: white;
+      background: var(--primary);
+      box-shadow: 0 7px 16px rgba(15, 118, 110, 0.22);
+    }
+
+    .btn-secondary {
+      color: var(--primary-dark);
+      background: var(--primary-light);
+    }
+
+    .btn-outline {
+      color: #334155;
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      color: var(--red);
+      background: var(--red-light);
+    }
+
+    .btn-small {
+      min-height: 34px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: white;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 25px;
+      font-weight: 850;
+      letter-spacing: -0.035em;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      color: #475569;
+      background: #f8fafc;
+      font-size: 12px;
+      letter-spacing: 0.025em;
+      text-transform: uppercase;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover td {
+      background: #fbfdfd;
+    }
+
+    .meter-table input {
+      min-width: 110px;
+    }
+
+    .money {
+      color: var(--primary-dark);
+      font-weight: 850;
+    }
+
+    .consumption {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pill-green {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .pill-red {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .pill-blue {
+      color: #075985;
+      background: #e0f2fe;
+    }
+
+    .notice {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      line-height: 1.45;
+    }
+
+    .notice-info {
+      color: #075985;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+    }
+
+    .notice-warning {
+      color: #9a3412;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+    }
+
+    .notice-success {
+      color: #166534;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .notice-error {
+      color: #991b1b;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .empty {
+      padding: 35px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 40px;
+    }
+
+    .resident-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .resident-card strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .resident-card span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .result-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-top: 15px;
+      padding: 18px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--primary-light), #e0f2fe);
+    }
+
+    .result-total strong {
+      font-size: 22px;
+      color: var(--primary-dark);
+    }
+
+    .history-period {
+      font-weight: 850;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .total-fields {
+      padding: 16px;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: #f8fafc;
+    }
+
+    .formula-help {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    footer {
+      padding: 0 20px 30px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1000;
+      max-width: min(380px, calc(100% - 36px));
+      padding: 13px 16px;
+      border-radius: 12px;
+      color: white;
+      background: #0f172a;
+      box-shadow: 0 16px 35px rgba(15, 23, 42, 0.25);
+      opacity: 0;
+      transform: translateY(15px);
+      pointer-events: none;
+      transition: 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error {
+      background: var(--red);
+    }
+
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.58);
+    }
+
+    .dialog {
+      width: min(620px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px;
+      border-radius: 18px;
+      background: white;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+    }
+
+    .dialog h3 {
+      margin-top: 0;
+    }
+
+    @media (max-width: 900px) {
+      .grid-4,
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .topbar {
+        padding-top: 22px;
+      }
+
+      main {
+        width: min(100% - 18px, 1180px);
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 15px;
+      }
+
+      .card-header {
+        flex-direction: column;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row .btn {
+        flex: 1;
+      }
+
+      .result-total {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand-icon {
+        width: 47px;
+        height: 47px;
+        border-radius: 14px;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .topbar,
+      .nav-tabs,
+      .no-print,
+      footer {
+        display: none !important;
+      }
+
+      main {
+        width: 100%;
+        margin: 0;
+      }
+
+      .page {
+        display: none !important;
+      }
+
+      #page-calculation {
+        display: block !important;
+      }
+
+      #bill-form-card,
+      #meter-entry-card {
+        display: none !important;
+      }
+
+      .card {
+        border: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-icon">💧</div>
+          <div>
+            <h1>Ripartizione Acqua</h1>
+            <p>Calcolo delle quote tra contatori interni</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <nav class="nav-tabs no-print" aria-label="Navigazione">
+        <button class="nav-tab active" data-page="calculation">🧮 Nuova bolletta</button>
+        <button class="nav-tab" data-page="residents">🏠 Interni</button>
+        <button class="nav-tab" data-page="history">🧾 Storico</button>
+        <button class="nav-tab" data-page="settings">⚙️ Dati e backup</button>
+      </nav>
+
+      <section id="page-calculation" class="page active">
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Interni attivi</span>
+            <span class="stat-value" id="stat-residents">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Totale bolletta</span>
+            <span class="stat-value" id="stat-bill">€ 0,00</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Consumi inseriti</span>
+            <span class="stat-value" id="stat-consumption">0,000 m³</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Differenza contatori</span>
+            <span class="stat-value" id="stat-difference">0,000 m³</span>
+          </div>
+        </div>
+
+        <div class="card" id="bill-form-card">
+          <div class="card-header">
+            <div>
+              <h2>Dati della bolletta</h2>
+              <p>Inserisci importo, periodo e criterio di suddivisione.</p>
+            </div>
+            <button class="btn btn-outline btn-small no-print" type="button" id="reset-calculation">
+              Nuova compilazione
+            </button>
+          </div>
+
+          <div class="grid grid-3">
+            <div class="field">
+              <label for="bill-period">Periodo della bolletta</label>
+              <input id="bill-period" type="text" placeholder="Es. Settembre - Ottobre 2026">
+            </div>
+
+            <div class="field">
+              <label for="bill-date">Data bolletta</label>
+              <input id="bill-date" type="date">
+            </div>
+
+            <div class="field">
+              <label for="bill-number">Numero bolletta, facoltativo</label>
+              <input id="bill-number" type="text" placeholder="Es. 2026/001234">
+            </div>
+          </div>
+
+          <div class="grid grid-4" style="margin-top: 16px;">
+            <div class="field">
+              <label for="bill-total">Totale da ripartire</label>
+              <input id="bill-total" type="number" min="0" step="0.01" placeholder="0,00">
+              <small>Importo effettivamente dovuto.</small>
+            </div>
+
+            <div class="field">
+              <label for="fixed-total">Totale quote fisse</label>
+              <input id="fixed-total" type="number" min="0" step="0.01" value="0">
+              <small>Diviso in parti uguali.</small>
+            </div>
+
+            <div class="field">
+              <label for="main-consumption">Consumo contatore principale</label>
+              <input id="main-consumption" type="number" min="0" step="0.001" placeholder="m³">
+              <small>Serve per controllare le differenze.</small>
+            </div>
+
+            <div class="field">
+              <label for="distribution-method">Metodo di ripartizione</label>
+              <select id="distribution-method">
+                <option value="fixed-variable">Quota fissa + consumi</option>
+                <option value="all-consumption">Tutto proporzionale ai consumi</option>
+                <option value="all-equal">Tutto diviso in parti uguali</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="amount-check" class="notice notice-info">
+            La parte variabile sarà calcolata sottraendo le quote fisse dal totale.
+          </div>
+
+          <div class="field" style="margin-top: 16px;">
+            <label for="bill-notes">Note, facoltative</label>
+            <textarea id="bill-notes" placeholder="Es. Conguaglio, perdita verificata, lettura stimata..."></textarea>
+          </div>
+        </div>
+
+        <div class="card" id="meter-entry-card">
+          <div class="card-header">
+            <div>
+              <h2>Letture dei contatori</h2>
+              <p>Il consumo viene calcolato come lettura attuale meno lettura precedente.</p>
+            </div>
+          </div>
+
+          <div id="no-residents-calculation" class="empty">
+            <span class="empty-icon">🏠</span>
+            Non hai ancora configurato gli interni.
+            <div style="margin-top: 12px;">
+              <button class="btn btn-primary no-print" type="button" id="go-to-residents">
+                Aggiungi gli interni
+              </button>
+            </div>
+          </div>
+
+          <div id="meter-table-container" class="table-wrap hidden">
+            <table class="meter-table">
+              <thead>
+                <tr>
+                  <th>Interno</th>
+                  <th>Lettura precedente</th>
+                  <th>Lettura attuale</th>
+                  <th>Consumo</th>
+                  <th>Quota fissa</th>
+                  <th>Quota consumo</th>
+                  <th>Totale</th>
+                </tr>
+              </thead>
+              <tbody id="meter-table-body"></tbody>
+            </table>
+          </div>
+
+          <div id="difference-notice" class="notice notice-info hidden"></div>
+
+          <div class="button-row no-print" style="margin-top: 18px;">
+            <button class="btn btn-primary" type="button" id="calculate-button">
+              Calcola ripartizione
+            </button>
+            <button class="btn btn-outline" type="button" id="save-button" disabled>
+              Salva nello storico
+            </button>
+          </div>
+        </div>
+
+        <div class="card hidden" id="results-card">
+          <div class="card-header">
+            <div>
+              <h2>Risultato della ripartizione</h2>
+              <p id="results-description">Riepilogo della bolletta.</p>
+            </div>
+
+            <div class="button-row no-print">
+              <button class="btn btn-secondary btn-small" type="button" id="copy-summary">
+                Copia riepilogo
+              </button>
+              <button class="btn btn-outline btn-small" type="button" id="print-summary">
+                Stampa / PDF
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Interno</th>
+                  <th>Consumo</th>
+                  <th>Quota fissa</th>
+                  <th>Quota consumo</th>
+                  <th>Totale dovuto</th>
+                </tr>
+              </thead>
+              <tbody id="results-table-body"></tbody>
+            </table>
+          </div>
+
+          <div class="result-total">
+            <span>Totale ripartito</span>
+            <strong id="distributed-total">€ 0,00</strong>
+          </div>
+
+          <div id="rounding-message" class="formula-help"></div>
+        </div>
+      </section>
+
+      <section id="page-residents" class="page">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Gestione degli interni</h2>
+              <p>Aggiungi le unità collegate alla cisterna e l'ultima lettura disponibile.</p>
+            </div>
+          </div>
+
+          <form id="resident-form">
+            <input type="hidden" id="resident-id">
+
+            <div class="grid grid-3">
+              <div class="field">
+                <label for="resident-name">Nome interno o proprietario</label>
+                <input id="resident-name" required placeholder="Es. Interno Andrea">
+              </div>
+
+              <div class="field">
+                <label for="resident-meter">Numero contatore, facoltativo</label>
+                <input id="resident-meter" placeholder="Es. CNT-001">
+              </div>
+
+              <div class="field">
+                <label for="resident-reading">Ultima lettura conosciuta</label>
+                <input id="resident-reading" required type="number" min="0" step="0.001" placeholder="0,000">
+              </div>
+            </div>
+
+            <div class="button-row" style="margin-top: 16px;">
+              <button class="btn btn-primary" type="submit" id="resident-submit">
+                Aggiungi interno
+              </button>
+              <button class="btn btn-outline hidden" type="button" id="resident-cancel">
+                Annulla modifica
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Interni configurati</h3>
+              <p>Le letture vengono aggiornate automaticamente quando salvi una bolletta.</p>
+            </div>
+          </div>
+
+          <div id="resident-list"></div>
+        </div>
+      </section>
+
+      <section id="page-history" class="page">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Storico bollette</h2>
+              <p>Consulta, ristampa o elimina le ripartizioni salvate.</p>
+            </div>
+          </div>
+
+          <div id="history-container"></div>
+        </div>
+      </section>
+
+      <section id="page-settings" class="page">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Backup e ripristino</h2>
+              <p>I dati sono memorizzati solamente nel browser di questo dispositivo.</p>
+            </div>
+          </div>
+
+          <div class="notice notice-warning" style="margin-top: 0;">
+            Se cancelli i dati del browser o cambi dispositivo, perderai lo storico.
+            Esporta periodicamente un backup JSON e conservalo in un luogo sicuro.
+          </div>
+
+          <div class="button-row" style="margin-top: 18px;">
+            <button class="btn btn-primary" type="button" id="export-data">
+              Esporta backup
+            </button>
+
+            <button class="btn btn-outline" type="button" id="import-data">
+              Importa backup
+            </button>
+
+            <input class="hidden" id="import-file" type="file" accept="application/json,.json">
+
+            <button class="btn btn-danger" type="button" id="delete-all-data">
+              Cancella tutti i dati
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Come viene eseguito il calcolo</h2>
+            </div>
+          </div>
+
+          <div class="formula-help">
+            <strong>Quota fissa + consumi</strong><br>
+            La quota fissa complessiva viene divisa in parti uguali. La parte restante
+            della bolletta viene distribuita proporzionalmente ai metri cubi consumati.
+            <br><br>
+
+            <strong>Tutto proporzionale ai consumi</strong><br>
+            L'intero importo viene distribuito in base al consumo di ogni interno.
+            <br><br>
+
+            <strong>Tutto in parti uguali</strong><br>
+            L'importo viene diviso per il numero di interni, indipendentemente dai consumi.
+            <br><br>
+
+            Per evitare differenze di un centesimo, l'eventuale residuo dovuto agli
+            arrotondamenti viene assegnato all'interno con il maggiore consumo.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Applicazione locale e gratuita. Nessun dato viene inviato online.
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="dialog-root"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "ripartizione-acqua-v1";
+
+      const state = loadState();
+
+      let currentResults = null;
+      let toastTimer = null;
+
+      const euroFormatter = new Intl.NumberFormat("it-IT", {
+        style: "currency",
+        currency: "EUR"
+      });
+
+      const numberFormatter = new Intl.NumberFormat("it-IT", {
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3
+      });
+
+      const elements = {
+        tabs: document.querySelectorAll(".nav-tab"),
+        pages: document.querySelectorAll(".page"),
+
+        billPeriod: document.getElementById("bill-period"),
+        billDate: document.getElementById("bill-date"),
+        billNumber: document.getElementById("bill-number"),
+        billTotal: document.getElementById("bill-total"),
+        fixedTotal: document.getElementById("fixed-total"),
+        mainConsumption: document.getElementById("main-consumption"),
+        distributionMethod: document.getElementById("distribution-method"),
+        billNotes: document.getElementById("bill-notes"),
+        amountCheck: document.getElementById("amount-check"),
+
+        statResidents: document.getElementById("stat-residents"),
+        statBill: document.getElementById("stat-bill"),
+        statConsumption: document.getElementById("stat-consumption"),
+        statDifference: document.getElementById("stat-difference"),
+
+        noResidentsCalculation: document.getElementById("no-residents-calculation"),
+        meterTableContainer: document.getElementById("meter-table-container"),
+        meterTableBody: document.getElementById("meter-table-body"),
+        differenceNotice: document.getElementById("difference-notice"),
+
+        calculateButton: document.getElementById("calculate-button"),
+        saveButton: document.getElementById("save-button"),
+        resetCalculation: document.getElementById("reset-calculation"),
+        resultsCard: document.getElementById("results-card"),
+        resultsDescription: document.getElementById("results-description"),
+        resultsTableBody: document.getElementById("results-table-body"),
+        distributedTotal: document.getElementById("distributed-total"),
+        roundingMessage: document.getElementById("rounding-message"),
+        copySummary: document.getElementById("copy-summary"),
+        printSummary: document.getElementById("print-summary"),
+
+        residentForm: document.getElementById("resident-form"),
+        residentId: document.getElementById("resident-id"),
+        residentName: document.getElementById("resident-name"),
+        residentMeter: document.getElementById("resident-meter"),
+        residentReading: document.getElementById("resident-reading"),
+        residentSubmit: document.getElementById("resident-submit"),
+        residentCancel: document.getElementById("resident-cancel"),
+        residentList: document.getElementById("resident-list"),
+
+        historyContainer: document.getElementById("history-container"),
+
+        exportData: document.getElementById("export-data"),
+        importData: document.getElementById("import-data"),
+        importFile: document.getElementById("import-file"),
+        deleteAllData: document.getElementById("delete-all-data"),
+
+        toast: document.getElementById("toast"),
+        dialogRoot: document.getElementById("dialog-root")
+      };
+
+      initialize();
+
+      function initialize() {
+        setDefaultDate();
+        bindEvents();
+        renderAll();
+      }
+
+      function defaultState() {
+        return {
+          residents: [],
+          bills: []
+        };
+      }
+
+      function loadState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+
+          if (!saved) {
+            return defaultState();
+          }
+
+          const parsed = JSON.parse(saved);
+
+          return {
+            residents: Array.isArray(parsed.residents) ? parsed.residents : [],
+            bills: Array.isArray(parsed.bills) ? parsed.bills : []
+          };
+        } catch (error) {
+          console.error(error);
+          return defaultState();
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function bindEvents() {
+        elements.tabs.forEach(tab => {
+          tab.addEventListener("click", () => {
+            showPage(tab.dataset.page);
+          });
+        });
+
+        elements.residentForm.addEventListener("submit", saveResident);
+        elements.residentCancel.addEventListener("click", resetResidentForm);
+
+        elements.calculateButton.addEventListener("click", calculateDistribution);
+        elements.saveButton.addEventListener("click", saveBill);
+        elements.resetCalculation.addEventListener("click", resetCalculationForm);
+        elements.copySummary.addEventListener("click", copySummary);
+        elements.printSummary.addEventListener("click", () => window.print());
+
+        elements.billTotal.addEventListener("input", updateLiveSummary);
+        elements.fixedTotal.addEventListener("input", updateLiveSummary);
+        elements.mainConsumption.addEventListener("input", updateLiveSummary);
+        elements.distributionMethod.addEventListener("change", () => {
+          updateMethodInterface();
+          updateLiveSummary();
+        });
+
+        document.getElementById("go-to-residents").addEventListener("click", () => {
+          showPage("residents");
+          elements.residentName.focus();
+        });
+
+        elements.exportData.addEventListener("click", exportData);
+        elements.importData.addEventListener("click", () => elements.importFile.click());
+        elements.importFile.addEventListener("change", importData);
+        elements.deleteAllData.addEventListener("click", deleteAllData);
+      }
+
+      function showPage(pageName) {
+        elements.tabs.forEach(tab => {
+          tab.classList.toggle("active", tab.dataset.page === pageName);
+        });
+
+        elements.pages.forEach(page => {
+          page.classList.toggle("active", page.id === `page-${pageName}`);
+        });
+
+        if (pageName === "history") {
+          renderHistory();
+        }
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      }
+
+      function renderAll() {
+        renderResidents();
+        renderMeterTable();
+        renderHistory();
+        updateMethodInterface();
+        updateLiveSummary();
+      }
+
+      function renderResidents() {
+        elements.residentList.innerHTML = "";
+
+        if (state.residents.length === 0) {
+          elements.residentList.innerHTML = `
+            <div class="empty">
+              <span class="empty-icon">🏘️</span>
+              Nessun interno configurato.
+            </div>
+          `;
+          return;
+        }
+
+        const orderedResidents = [...state.residents].sort((a, b) =>
+          a.name.localeCompare(b.name, "it")
+        );
+
+        orderedResidents.forEach(resident => {
+          const card = document.createElement("div");
+          card.className = "resident-card";
+
+          const meterText = resident.meterNumber
+            ? `Contatore ${escapeHtml(resident.meterNumber)} · `
+            : "";
+
+          card.innerHTML = `
+            <div>
+              <strong>${escapeHtml(resident.name)}</strong>
+              <span>
+                ${meterText}ultima lettura:
+                ${numberFormatter.format(resident.lastReading)} m³
+              </span>
+            </div>
+
+            <div class="button-row">
+              <button
+                class="btn btn-outline btn-small"
+                type="button"
+                data-action="edit"
+                data-id="${resident.id}">
+                Modifica
+              </button>
+
+              <button
+                class="btn btn-danger btn-small"
+                type="button"
+                data-action="delete"
+                data-id="${resident.id}">
+                Elimina
+              </button>
+            </div>
+          `;
+
+          card.querySelector('[data-action="edit"]').addEventListener("click", () => {
+            editResident(resident.id);
+          });
+
+          card.querySelector('[data-action="delete"]').addEventListener("click", () => {
+            deleteResident(resident.id);
+          });
+
+          elements.residentList.appendChild(card);
+        });
+      }
+
+      function saveResident(event) {
+        event.preventDefault();
+
+        const id = elements.residentId.value;
+        const name = elements.residentName.value.trim();
+        const meterNumber = elements.residentMeter.value.trim();
+        const lastReading = parseNumber(elements.residentReading.value);
+
+        if (!name) {
+          showToast("Inserisci il nome dell'interno.", true);
+          return;
+        }
+
+        if (!Number.isFinite(lastReading) || lastReading < 0) {
+          showToast("Inserisci una lettura valida.", true);
+          return;
+        }
+
+        if (id) {
+          const resident = state.residents.find(item => item.id === id);
+
+          if (!resident) {
+            showToast("Interno non trovato.", true);
+            return;
+          }
+
+          resident.name = name;
+          resident.meterNumber = meterNumber;
+          resident.lastReading = lastReading;
+
+          showToast("Interno aggiornato.");
+        } else {
+          state.residents.push({
+            id: createId(),
+            name,
+            meterNumber,
+            lastReading
+          });
+
+          showToast("Interno aggiunto.");
+        }
+
+        saveState();
+        resetResidentForm();
+        renderAll();
+      }
+
+      function editResident(id) {
+        const resident = state.residents.find(item => item.id === id);
+
+        if (!resident) {
+          return;
+        }
+
+        elements.residentId.value = resident.id;
+        elements.residentName.value = resident.name;
+        elements.residentMeter.value = resident.meterNumber || "";
+        elements.residentReading.value = resident.lastReading;
+        elements.residentSubmit.textContent = "Salva modifica";
+        elements.residentCancel.classList.remove("hidden");
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+        elements.residentName.focus();
+      }
+
+      function resetResidentForm() {
+        elements.residentForm.reset();
+        elements.residentId.value = "";
+        elements.residentSubmit.textContent = "Aggiungi interno";
+        elements.residentCancel.classList.add("hidden");
+      }
+
+      function deleteResident(id) {
+        const resident = state.residents.find(item => item.id === id);
+
+        if (!resident) {
+          return;
+        }
+
+        openConfirmDialog({
+          title: "Eliminare l'interno?",
+          message: `Vuoi eliminare "${resident.name}"? Le bollette già salvate resteranno nello storico.`,
+          confirmLabel: "Elimina",
+          danger: true,
+          onConfirm: () => {
+            state.residents = state.residents.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+            showToast("Interno eliminato.");
+          }
+        });
+      }
+
+      function renderMeterTable() {
+        const residents = [...state.residents].sort((a, b) =>
+          a.name.localeCompare(b.name, "it")
+        );
+
+        elements.statResidents.textContent = residents.length;
+        elements.meterTableBody.innerHTML = "";
+
+        if (residents.length === 0) {
+          elements.noResidentsCalculation.classList.remove("hidden");
+          elements.meterTableContainer.classList.add("hidden");
+          elements.calculateButton.disabled = true;
+          return;
+        }
+
+        elements.noResidentsCalculation.classList.add("hidden");
+        elements.meterTableContainer.classList.remove("hidden");
+        elements.calculateButton.disabled = false;
+
+        residents.forEach(resident => {
+          const row = document.createElement("tr");
+          row.dataset.residentId = resident.id;
+
+          row.innerHTML = `
+            <td>
+              <strong>${escapeHtml(resident.name)}</strong>
+              ${
+                resident.meterNumber
+                  ? `<div class="muted">${escapeHtml(resident.meterNumber)}</div>`
+                  : ""
+              }
+            </td>
+
+            <td>
+              <input
+                class="previous-reading"
+                type="number"
+                min="0"
+                step="0.001"
+                value="${resident.lastReading}"
+                aria-label="Lettura precedente di ${escapeHtml(resident.name)}">
+            </td>
+
+            <td>
+              <input
+                class="current-reading"
+                type="number"
+                min="0"
+                step="0.001"
+                placeholder="0,000"
+                aria-label="Lettura attuale di ${escapeHtml(resident.name)}">
+            </td>
+
+            <td class="consumption calculated-consumption">0,000 m³</td>
+            <td class="calculated-fixed">€ 0,00</td>
+            <td class="calculated-variable">€ 0,00</td>
+            <td class="money calculated-total">€ 0,00</td>
+          `;
+
+          row.querySelector(".previous-reading").addEventListener("input", () => {
+            recalculateRow(row);
+            updateLiveSummary();
+          });
+
+          row.querySelector(".current-reading").addEventListener("input", () => {
+            recalculateRow(row);
+            updateLiveSummary();
+          });
+
+          elements.meterTableBody.appendChild(row);
+        });
+
+        currentResults = null;
+        elements.resultsCard.classList.add("hidden");
+        elements.saveButton.disabled = true;
+      }
+
+      function recalculateRow(row) {
+        const previous = parseNumber(row.querySelector(".previous-reading").value);
+        const currentField = row.querySelector(".current-reading");
+        const current = parseNumber(currentField.value);
+
+        let consumption = 0;
+
+        if (currentField.value !== "" && Number.isFinite(previous) && Number.isFinite(current)) {
+          consumption = current - previous;
+        }
+
+        row.querySelector(".calculated-consumption").textContent =
+          `${numberFormatter.format(Math.max(0, consumption))} m³`;
+
+        row.dataset.consumption = consumption;
+      }
+
+      function getReadingData() {
+        const rows = [...elements.meterTableBody.querySelectorAll("tr")];
+
+        return rows.map(row => {
+          const resident = state.residents.find(item => item.id === row.dataset.residentId);
+          const previousReading = parseNumber(row.querySelector(".previous-reading").value);
+          const currentInput = row.querySelector(".current-reading");
+          const currentReading = parseNumber(currentInput.value);
+
+          return {
+            residentId: resident.id,
+            name: resident.name,
+            meterNumber: resident.meterNumber || "",
+            previousReading,
+            currentReading,
+            hasCurrentReading: currentInput.value.trim() !== "",
+            consumption: roundTo(currentReading - previousReading, 3),
+            row
+          };
+        });
+      }
+
+      function calculateDistribution() {
+        const validation = validateCalculation();
+
+        if (!validation.valid) {
+          showToast(validation.message, true);
+          return;
+        }
+
+        const data = validation.data;
+        const calculation = buildDistribution(data);
+
+        currentResults = calculation;
+        renderCalculation(calculation);
+
+        elements.resultsCard.classList.remove("hidden");
+        elements.saveButton.disabled = false;
+
+        elements.resultsCard.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+      function validateCalculation() {
+        const period = elements.billPeriod.value.trim();
+        const total = parseNumber(elements.billTotal.value);
+        const fixedTotal = parseNumber(elements.fixedTotal.value);
+        const readings = getReadingData();
+        const method = elements.distributionMethod.value;
+
+        if (!period) {
+          return {
+            valid: false,
+            message: "Inserisci il periodo della bolletta."
+          };
+        }
+
+        if (!Number.isFinite(total) || total <= 0) {
+          return {
+            valid: false,
+            message: "Inserisci un totale bolletta maggiore di zero."
+          };
+        }
+
+        if (!Number.isFinite(fixedTotal) || fixedTotal < 0) {
+          return {
+            valid: false,
+            message: "La quota fissa non può essere negativa."
+          };
+        }
+
+        if (method === "fixed-variable" && fixedTotal > total) {
+          return {
+            valid: false,
+            message: "Le quote fisse non possono superare il totale della bolletta."
+          };
+        }
+
+        for (const reading of readings) {
+          if (!reading.hasCurrentReading) {
+            return {
+              valid: false,
+              message: `Inserisci la lettura attuale per ${reading.name}.`
+            };
+          }
+
+          if (!Number.isFinite(reading.previousReading) ||
+              !Number.isFinite(reading.currentReading)) {
+            return {
+              valid: false,
+              message: `Controlla le letture di ${reading.name}.`
+            };
+          }
+
+          if (reading.currentReading < reading.previousReading) {
+            return {
+              valid: false,
+              message: `La lettura attuale di ${reading.name} è inferiore alla precedente.`
+            };
+          }
+        }
+
+        const totalConsumption = roundTo(
+          readings.reduce((sum, item) => sum + item.consumption, 0),
+          3
+        );
+
+        if (
+          (method === "fixed-variable" || method === "all-consumption") &&
+          totalConsumption <= 0
+        ) {
+          return {
+            valid: false,
+            message: "Il consumo complessivo deve essere maggiore di zero."
+          };
+        }
+
+        return {
+          valid: true,
+          data: {
+            period,
+            billDate: elements.billDate.value,
+            billNumber: elements.billNumber.value.trim(),
+            total,
+            fixedTotal,
+            mainConsumption: parseOptionalNumber(elements.mainConsumption.value),
+            method,
+            notes: elements.billNotes.value.trim(),
+            readings,
+            totalConsumption
+          }
+        };
+      }
+
+      function buildDistribution(data) {
+        const residentCount = data.readings.length;
+
+        let fixedAmount = 0;
+        let variableAmount = 0;
+
+        if (data.method === "fixed-variable") {
+          fixedAmount = data.fixedTotal;
+          variableAmount = roundMoney(data.total - data.fixedTotal);
+        }
+
+        if (data.method === "all-consumption") {
+          fixedAmount = 0;
+          variableAmount = data.total;
+        }
+
+        if (data.method === "all-equal") {
+          fixedAmount = data.total;
+          variableAmount = 0;
+        }
+
+        const items = data.readings.map(reading => {
+          const fixedShare = fixedAmount > 0
+            ? roundMoney(fixedAmount / residentCount)
+            : 0;
+
+          const variableShare = variableAmount > 0
+            ? roundMoney(variableAmount * reading.consumption / data.totalConsumption)
+            : 0;
+
+          return {
+            residentId: reading.residentId,
+            name: reading.name,
+            meterNumber: reading.meterNumber,
+            previousReading: reading.previousReading,
+            currentReading: reading.currentReading,
+            consumption: reading.consumption,
+            fixedShare,
+            variableShare,
+            totalShare: roundMoney(fixedShare + variableShare),
+            row: reading.row
+          };
+        });
+
+        let distributed = roundMoney(
+          items.reduce((sum, item) => sum + item.totalShare, 0)
+        );
+
+        const roundingDifference = roundMoney(data.total - distributed);
+
+        if (roundingDifference !== 0 && items.length > 0) {
+          const target = [...items].sort((a, b) => {
+            if (b.consumption !== a.consumption) {
+              return b.consumption - a.consumption;
+            }
+
+            return a.name.localeCompare(b.name, "it");
+          })[0];
+
+          target.totalShare = roundMoney(target.totalShare + roundingDifference);
+
+          if (variableAmount > 0) {
+            target.variableShare = roundMoney(target.variableShare + roundingDifference);
+          } else {
+            target.fixedShare = roundMoney(target.fixedShare + roundingDifference);
+          }
+        }
+
+        distributed = roundMoney(
+          items.reduce((sum, item) => sum + item.totalShare, 0)
+        );
+
+        const difference = data.mainConsumption === null
+          ? null
+          : roundTo(data.mainConsumption - data.totalConsumption, 3);
+
+        return {
+          ...data,
+          fixedAmount,
+          variableAmount,
+          items,
+          distributed,
+          roundingDifference,
+          difference
+        };
+      }
+
+      function renderCalculation(calculation) {
+        elements.resultsTableBody.innerHTML = "";
+
+        calculation.items.forEach(item => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td><strong>${escapeHtml(item.name)}</strong></td>
+            <td class="consumption">${numberFormatter.format(item.consumption)} m³</td>
+            <td>${euroFormatter.format(item.fixedShare)}</td>
+            <td>${euroFormatter.format(item.variableShare)}</td>
+            <td class="money">${euroFormatter.format(item.totalShare)}</td>
+          `;
+
+          elements.resultsTableBody.appendChild(row);
+
+          if (item.row) {
+            item.row.querySelector(".calculated-fixed").textContent =
+              euroFormatter.format(item.fixedShare);
+
+            item.row.querySelector(".calculated-variable").textContent =
+              euroFormatter.format(item.variableShare);
+
+            item.row.querySelector(".calculated-total").textContent =
+              euroFormatter.format(item.totalShare);
+          }
+        });
+
+        elements.distributedTotal.textContent = euroFormatter.format(calculation.distributed);
+        elements.resultsDescription.textContent =
+          `${calculation.period} · ${numberFormatter.format(calculation.totalConsumption)} m³`;
+
+        elements.roundingMessage.textContent =
+          calculation.roundingDifference !== 0
+            ? `È stata compensata una differenza di arrotondamento di ${euroFormatter.format(
+                Math.abs(calculation.roundingDifference)
+              )}.`
+            : "La somma delle quote corrisponde esattamente al totale della bolletta.";
+
+        renderDifferenceNotice(calculation.totalConsumption, calculation.mainConsumption);
+        updateLiveSummary();
+      }
+
+      function saveBill() {
+        if (!currentResults) {
+          showToast("Calcola prima la ripartizione.", true);
+          return;
+        }
+
+        const duplicate = state.bills.some(
+          bill =>
+            bill.period.toLowerCase() === currentResults.period.toLowerCase() &&
+            bill.total === currentResults.total
+        );
+
+        const completeSave = () => {
+          const bill = {
+            id: createId(),
+            createdAt: new Date().toISOString(),
+            period: currentResults.period,
+            billDate: currentResults.billDate,
+            billNumber: currentResults.billNumber,
+            total: currentResults.total,
+            fixedTotal: currentResults.fixedTotal,
+            fixedAmount: currentResults.fixedAmount,
+            variableAmount: currentResults.variableAmount,
+            mainConsumption: currentResults.mainConsumption,
+            totalConsumption: currentResults.totalConsumption,
+            difference: currentResults.difference,
+            method: currentResults.method,
+            notes: currentResults.notes,
+            items: currentResults.items.map(item => ({
+              residentId: item.residentId,
+              name: item.name,
+              meterNumber: item.meterNumber,
+              previousReading: item.previousReading,
+              currentReading: item.currentReading,
+              consumption: item.consumption,
+              fixedShare: item.fixedShare,
+              variableShare: item.variableShare,
+              totalShare: item.totalShare
+            }))
+          };
+
+          state.bills.unshift(bill);
+
+          bill.items.forEach(item => {
+            const resident = state.residents.find(
+              residentItem => residentItem.id === item.residentId
+            );
+
+            if (resident) {
+              resident.lastReading = item.currentReading;
+            }
+          });
+
+          saveState();
+          renderResidents();
+          renderHistory();
+
+          elements.saveButton.disabled = true;
+          showToast("Bolletta salvata e letture aggiornate.");
+        };
+
+        if (duplicate) {
+          openConfirmDialog({
+            title: "Bolletta simile già presente",
+            message:
+              "Nello storico esiste già una bolletta con lo stesso periodo e importo. Vuoi salvarla comunque?",
+            confirmLabel: "Salva comunque",
+            onConfirm: completeSave
+          });
+        } else {
+          completeSave();
+        }
+      }
+
+      function renderHistory() {
+        elements.historyContainer.innerHTML = "";
+
+        if (state.bills.length === 0) {
+          elements.historyContainer.innerHTML = `
+            <div class="empty">
+              <span class="empty-icon">🧾</span>
+              Nessuna bolletta salvata.
+            </div>
+          `;
+          return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrap";
+
+        const table = document.createElement("table");
+
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Periodo</th>
+              <th>Data</th>
+              <th>Consumo</th>
+              <th>Totale</th>
+              <th>Interni</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector("tbody");
+
+        [...state.bills]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .forEach(bill => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+              <td class="history-period">${escapeHtml(bill.period)}</td>
+              <td>${formatDate(bill.billDate || bill.createdAt)}</td>
+              <td>${numberFormatter.format(bill.totalConsumption)} m³</td>
+              <td class="money">${euroFormatter.format(bill.total)}</td>
+              <td>${bill.items.length}</td>
+              <td>
+                <div class="history-actions">
+                  <button
+                    class="btn btn-outline btn-small"
+                    type="button"
+                    data-action="view"
+                    data-id="${bill.id}">
+                    Apri
+                  </button>
+
+                  <button
+                    class="btn btn-danger btn-small"
+                    type="button"
+                    data-action="delete"
+                    data-id="${bill.id}">
+                    Elimina
+                  </button>
+                </div>
+              </td>
+            `;
+
+            row.querySelector('[data-action="view"]').addEventListener("click", () => {
+              showHistoricalBill(bill.id);
+            });
+
+            row.querySelector('[data-action="delete"]').addEventListener("click", () => {
+              deleteBill(bill.id);
+            });
+
+            tbody.appendChild(row);
+          });
+
+        wrapper.appendChild(table);
+        elements.historyContainer.appendChild(wrapper);
+      }
+
+      function showHistoricalBill(id) {
+        const bill = state.bills.find(item => item.id === id);
+
+        if (!bill) {
+          return;
+        }
+
+        const itemRows = bill.items
+          .map(item => `
+            <tr>
+              <td>${escapeHtml(item.name)}</td>
+              <td>${numberFormatter.format(item.consumption)} m³</td>
+              <td>${euroFormatter.format(item.fixedShare)}</td>
+              <td>${euroFormatter.format(item.variableShare)}</td>
+              <td class="money">${euroFormatter.format(item.totalShare)}</td>
+            </tr>
+          `)
+          .join("");
+
+        const dialog = document.createElement("div");
+        dialog.className = "dialog-backdrop";
+
+        dialog.innerHTML = `
+          <div class="dialog" role="dialog" aria-modal="true">
+            <div class="card-header">
+              <div>
+                <h3>${escapeHtml(bill.period)}</h3>
+                <p>
+                  ${formatDate(bill.billDate || bill.createdAt)}
+                  ${bill.billNumber ? ` · Bolletta ${escapeHtml(bill.billNumber)}` : ""}
+                </p>
+              </div>
+              <button class="btn btn-outline btn-small" type="button" data-close>
+                Chiudi
+              </button>
+            </div>
+
+            <div class="grid grid-3" style="margin-bottom: 16px;">
+              <div>
+                <span class="muted">Totale</span><br>
+                <strong>${euroFormatter.format(bill.total)}</strong>
+              </div>
+              <div>
+                <span class="muted">Consumo</span><br>
+                <strong>${numberFormatter.format(bill.totalConsumption)} m³</strong>
+              </div>
+              <div>
+                <span class="muted">Metodo</span><br>
+                <strong>${methodLabel(bill.method)}</strong>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Interno</th>
+                    <th>Consumo</th>
+                    <th>Quota fissa</th>
+                    <th>Quota consumo</th>
+                    <th>Totale</th>
+                  </tr>
+                </thead>
+                <tbody>${itemRows}</tbody>
+              </table>
+            </div>
+
+            ${
+              bill.notes
+                ? `<div class="notice notice-info">${escapeHtml(bill.notes)}</div>`
+                : ""
+            }
+
+            <div class="button-row" style="margin-top: 18px;">
+              <button class="btn btn-secondary" type="button" data-copy>
+                Copia riepilogo
+              </button>
+              <button class="btn btn-outline" type="button" data-load>
+                Carica nella schermata principale
+              </button>
+            </div>
+          </div>
+        `;
+
+        dialog.querySelector("[data-close]").addEventListener("click", closeDialog);
+        dialog.addEventListener("click", event => {
+          if (event.target === dialog) {
+            closeDialog();
+          }
+        });
+
+        dialog.querySelector("[data-copy]").addEventListener("click", async () => {
+          await copyText(buildSummaryText(bill));
+          showToast("Riepilogo copiato.");
+        });
+
+        dialog.querySelector("[data-load]").addEventListener("click", () => {
+          loadHistoricalBill(bill);
+          closeDialog();
+        });
+
+        elements.dialogRoot.innerHTML = "";
+        elements.dialogRoot.appendChild(dialog);
+      }
+
+      function loadHistoricalBill(bill) {
+        elements.billPeriod.value = bill.period || "";
+        elements.billDate.value = bill.billDate || "";
+        elements.billNumber.value = bill.billNumber || "";
+        elements.billTotal.value = bill.total;
+        elements.fixedTotal.value = bill.fixedTotal ?? bill.fixedAmount ?? 0;
+        elements.mainConsumption.value = bill.mainConsumption ?? "";
+        elements.distributionMethod.value = bill.method;
+        elements.billNotes.value = bill.notes || "";
+
+        renderMeterTable();
+
+        bill.items.forEach(item => {
+          const row = elements.meterTableBody.querySelector(
+            `tr[data-resident-id="${CSS.escape(item.residentId)}"]`
+          );
+
+          if (!row) {
+            return;
+          }
+
+          row.querySelector(".previous-reading").value = item.previousReading;
+          row.querySelector(".current-reading").value = item.currentReading;
+          recalculateRow(row);
+        });
+
+        updateMethodInterface();
+        updateLiveSummary();
+        showPage("calculation");
+        showToast("Bolletta caricata. Puoi modificarla e salvarne una nuova copia.");
+      }
+
+      function deleteBill(id) {
+        const bill = state.bills.find(item => item.id === id);
+
+        if (!bill) {
+          return;
+        }
+
+        openConfirmDialog({
+          title: "Eliminare la bolletta?",
+          message: `Vuoi eliminare la ripartizione "${bill.period}" dallo storico? Le letture correnti degli interni non verranno modificate.`,
+          confirmLabel: "Elimina",
+          danger: true,
+          onConfirm: () => {
+            state.bills = state.bills.filter(item => item.id !== id);
+            saveState();
+            renderHistory();
+            showToast("Bolletta eliminata.");
+          }
+        });
+      }
+
+      function updateMethodInterface() {
+        const method = elements.distributionMethod.value;
+        const fixedField = elements.fixedTotal.closest(".field");
+
+        if (method === "fixed-variable") {
+          elements.fixedTotal.disabled = false;
+          fixedField.style.opacity = "1";
+          elements.amountCheck.textContent =
+            "La parte variabile sarà calcolata sottraendo le quote fisse dal totale.";
+        }
+
+        if (method === "all-consumption") {
+          elements.fixedTotal.disabled = true;
+          fixedField.style.opacity = "0.55";
+          elements.amountCheck.textContent =
+            "L'intero importo sarà distribuito proporzionalmente ai consumi.";
+        }
+
+        if (method === "all-equal") {
+          elements.fixedTotal.disabled = true;
+          fixedField.style.opacity = "0.55";
+          elements.amountCheck.textContent =
+            "L'intero importo sarà diviso in parti uguali tra gli interni.";
+        }
+      }
+
+      function updateLiveSummary() {
+        const total = parseNumber(elements.billTotal.value) || 0;
+        const readings = state.residents.length > 0 ? getReadingData() : [];
+
+        const totalConsumption = roundTo(
+          readings.reduce((sum, item) => {
+            return sum + Math.max(0, Number.isFinite(item.consumption) ? item.consumption : 0);
+          }, 0),
+          3
+        );
+
+        const mainConsumption = parseOptionalNumber(elements.mainConsumption.value);
+        const difference = mainConsumption === null
+          ? 0
+          : roundTo(mainConsumption - totalConsumption, 3);
+
+        elements.statBill.textContent = euroFormatter.format(total);
+        elements.statConsumption.textContent =
+          `${numberFormatter.format(totalConsumption)} m³`;
+        elements.statDifference.textContent =
+          `${numberFormatter.format(difference)} m³`;
+
+        if (difference < 0) {
+          elements.statDifference.style.color = "var(--red)";
+        } else if (difference > 0) {
+          elements.statDifference.style.color = "var(--orange)";
+        } else {
+          elements.statDifference.style.color = "var(--text)";
+        }
+
+        renderDifferenceNotice(totalConsumption, mainConsumption);
+
+        const method = elements.distributionMethod.value;
+        const fixedTotal = parseNumber(elements.fixedTotal.value) || 0;
+
+        if (method === "fixed-variable") {
+          const variable = roundMoney(total - fixedTotal);
+
+          if (fixedTotal > total && total > 0) {
+            elements.amountCheck.className = "notice notice-error";
+            elements.amountCheck.textContent =
+              "Errore: le quote fisse superano il totale della bolletta.";
+          } else {
+            elements.amountCheck.className = "notice notice-info";
+            elements.amountCheck.textContent =
+              `Quota fissa complessiva: ${euroFormatter.format(fixedTotal)} · ` +
+              `parte variabile: ${euroFormatter.format(Math.max(0, variable))}.`;
+          }
+        }
+
+        currentResults = null;
+        elements.saveButton.disabled = true;
+      }
+
+      function renderDifferenceNotice(totalConsumption, mainConsumption) {
+        if (mainConsumption === null) {
+          elements.differenceNotice.classList.add("hidden");
+          return;
+        }
+
+        const difference = roundTo(mainConsumption - totalConsumption, 3);
+        const absoluteDifference = Math.abs(difference);
+
+        elements.differenceNotice.classList.remove(
+          "hidden",
+          "notice-info",
+          "notice-success",
+          "notice-warning",
+          "notice-error"
+        );
+
+        if (absoluteDifference < 0.001) {
+          elements.differenceNotice.classList.add("notice-success");
+          elements.differenceNotice.innerHTML =
+            "<strong>Controllo riuscito:</strong> il consumo del contatore principale " +
+            "corrisponde alla somma dei sottocontatori.";
+          return;
+        }
+
+        if (difference > 0) {
+          const percentage = mainConsumption > 0
+            ? absoluteDifference / mainConsumption * 100
+            : 0;
+
+          elements.differenceNotice.classList.add(
+            percentage > 10 ? "notice-error" : "notice-warning"
+          );
+
+          elements.differenceNotice.innerHTML =
+            `<strong>Differenza rilevata:</strong> il contatore principale registra ` +
+            `${numberFormatter.format(absoluteDifference)} m³ in più rispetto ai sottocontatori ` +
+            `(${percentage.toLocaleString("it-IT", {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1
+            })}%). ` +
+            `Potrebbero esserci consumi comuni, letture non allineate o una perdita.`;
+        } else {
+          elements.differenceNotice.classList.add("notice-error");
+          elements.differenceNotice.innerHTML =
+            `<strong>Controlla le letture:</strong> la somma dei sottocontatori supera ` +
+            `il contatore principale di ${numberFormatter.format(absoluteDifference)} m³.`;
+        }
+      }
+
+      function resetCalculationForm() {
+        openConfirmDialog({
+          title: "Azzerare la compilazione?",
+          message:
+            "I dati inseriti nella nuova bolletta verranno cancellati. Gli interni e lo storico resteranno invariati.",
+          confirmLabel: "Azzera",
+          onConfirm: () => {
+            elements.billPeriod.value = "";
+            elements.billNumber.value = "";
+            elements.billTotal.value = "";
+            elements.fixedTotal.value = "0";
+            elements.mainConsumption.value = "";
+            elements.distributionMethod.value = "fixed-variable";
+            elements.billNotes.value = "";
+            setDefaultDate();
+
+            renderMeterTable();
+            updateMethodInterface();
+            updateLiveSummary();
+
+            showToast("Compilazione azzerata.");
+          }
+        });
+      }
+
+      async function copySummary() {
+        if (!currentResults) {
+          showToast("Calcola prima la ripartizione.", true);
+          return;
+        }
+
+        await copyText(buildSummaryText(currentResults));
+        showToast("Riepilogo copiato. Puoi incollarlo su WhatsApp.");
+      }
+
+      function buildSummaryText(bill) {
+        const lines = [
+          `💧 BOLLETTA ACQUA`,
+          `Periodo: ${bill.period}`,
+          `Totale: ${euroFormatter.format(bill.total)}`,
+          `Consumo sottocontatori: ${numberFormatter.format(bill.totalConsumption)} m³`,
+          ""
+        ];
+
+        bill.items.forEach(item => {
+          lines.push(
+            `${item.name}: ${numberFormatter.format(item.consumption)} m³ → ` +
+            `${euroFormatter.format(item.totalShare)}`
+          );
+        });
+
+        lines.push("");
+        lines.push(`Totale ripartito: ${euroFormatter.format(bill.total)}`);
+
+        if (bill.mainConsumption !== null && bill.mainConsumption !== undefined) {
+          lines.push(
+            `Contatore principale: ${numberFormatter.format(bill.mainConsumption)} m³`
+          );
+
+          lines.push(
+            `Differenza: ${numberFormatter.format(bill.difference || 0)} m³`
+          );
+        }
+
+        if (bill.notes) {
+          lines.push("");
+          lines.push(`Note: ${bill.notes}`);
+        }
+
+        return lines.join("\n");
+      }
+
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (error) {
+          const area = document.createElement("textarea");
+          area.value = text;
+          area.style.position = "fixed";
+          area.style.opacity = "0";
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand("copy");
+          area.remove();
+        }
+      }
+
+      function exportData() {
+        const backup = {
+          app: "Ripartizione Acqua",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          data: state
+        };
+
+        const blob = new Blob(
+          [JSON.stringify(backup, null, 2)],
+          { type: "application/json" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+
+        anchor.href = url;
+        anchor.download =
+          `backup-acqua-${new Date().toISOString().slice(0, 10)}.json`;
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        URL.revokeObjectURL(url);
+        showToast("Backup esportato.");
+      }
+
+      function importData(event) {
+        const file = event.target.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          try {
+            const imported = JSON.parse(reader.result);
+            const importedData = imported.data || imported;
+
+            if (
+              !importedData ||
+              !Array.isArray(importedData.residents) ||
+              !Array.isArray(importedData.bills)
+            ) {
+              throw new Error("Formato non valido");
+            }
+
+            openConfirmDialog({
+              title: "Importare il backup?",
+              message:
+                "I dati attuali verranno sostituiti con quelli contenuti nel file selezionato.",
+              confirmLabel: "Importa",
+              onConfirm: () => {
+                state.residents = importedData.residents;
+                state.bills = importedData.bills;
+
+                saveState();
+                resetResidentForm();
+                resetCalculationWithoutConfirmation();
+                renderAll();
+
+                showToast("Backup importato correttamente.");
+              }
+            });
+          } catch (error) {
+            showToast("Il file selezionato non è un backup valido.", true);
+          } finally {
+            elements.importFile.value = "";
+          }
+        };
+
+        reader.readAsText(file);
+      }
+
+      function deleteAllData() {
+        openConfirmDialog({
+          title: "Cancellare tutti i dati?",
+          message:
+            "Verranno eliminati tutti gli interni, le letture e lo storico. L'operazione non può essere annullata.",
+          confirmLabel: "Cancella definitivamente",
+          danger: true,
+          onConfirm: () => {
+            state.residents = [];
+            state.bills = [];
+
+            localStorage.removeItem(STORAGE_KEY);
+            resetResidentForm();
+            resetCalculationWithoutConfirmation();
+            renderAll();
+
+            showToast("Tutti i dati sono stati cancellati.");
+          }
+        });
+      }
+
+      function resetCalculationWithoutConfirmation() {
+        elements.billPeriod.value = "";
+        elements.billNumber.value = "";
+        elements.billTotal.value = "";
+        elements.fixedTotal.value = "0";
+        elements.mainConsumption.value = "";
+        elements.distributionMethod.value = "fixed-variable";
+        elements.billNotes.value = "";
+        setDefaultDate();
+
+        currentResults = null;
+        elements.resultsCard.classList.add("hidden");
+        elements.saveButton.disabled = true;
+      }
+
+      function openConfirmDialog({
+        title,
+        message,
+        confirmLabel,
+        danger = false,
+        onConfirm
+      }) {
+        const backdrop = document.createElement("div");
+        backdrop.className = "dialog-backdrop";
+
+        backdrop.innerHTML = `
+          <div class="dialog" role="dialog" aria-modal="true">
+            <h3>${escapeHtml(title)}</h3>
+            <p class="muted">${escapeHtml(message)}</p>
+
+            <div class="button-row" style="margin-top: 20px;">
+              <button class="btn btn-outline" type="button" data-cancel>
+                Annulla
+              </button>
+
+              <button
+                class="btn ${danger ? "btn-danger" : "btn-primary"}"
+                type="button"
+                data-confirm>
+                ${escapeHtml(confirmLabel)}
+              </button>
+            </div>
+          </div>
+        `;
+
+        backdrop.querySelector("[data-cancel]").addEventListener("click", closeDialog);
+
+        backdrop.querySelector("[data-confirm]").addEventListener("click", () => {
+          closeDialog();
+          onConfirm();
+        });
+
+        backdrop.addEventListener("click", event => {
+          if (event.target === backdrop) {
+            closeDialog();
+          }
+        });
+
+        elements.dialogRoot.innerHTML = "";
+        elements.dialogRoot.appendChild(backdrop);
+      }
+
+      function closeDialog() {
+        elements.dialogRoot.innerHTML = "";
+      }
+
+      function showToast(message, isError = false) {
+        clearTimeout(toastTimer);
+
+        elements.toast.textContent = message;
+        elements.toast.classList.toggle("error", isError);
+        elements.toast.classList.add("show");
+
+        toastTimer = setTimeout(() => {
+          elements.toast.classList.remove("show");
+        }, 3200);
+      }
+
+      function setDefaultDate() {
+        elements.billDate.value = new Date().toISOString().slice(0, 10);
+      }
+
+      function parseNumber(value) {
+        if (typeof value === "number") {
+          return value;
+        }
+
+        const normalized = String(value)
+          .trim()
+          .replace(/\s/g, "")
+          .replace(",", ".");
+
+        if (normalized === "") {
+          return NaN;
+        }
+
+        return Number(normalized);
+      }
+
+      function parseOptionalNumber(value) {
+        if (String(value).trim() === "") {
+          return null;
+        }
+
+        const parsed = parseNumber(value);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+
+      function roundMoney(value) {
+        return Math.round((value + Number.EPSILON) * 100) / 100;
+      }
+
+      function roundTo(value, decimals) {
+        const factor = 10 ** decimals;
+        return Math.round((value + Number.EPSILON) * factor) / factor;
+      }
+
+      function createId() {
+        if (window.crypto && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+
+        return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function methodLabel(method) {
+        const labels = {
+          "fixed-variable": "Quota fissa + consumi",
+          "all-consumption": "Proporzionale ai consumi",
+          "all-equal": "Parti uguali"
+        };
+
+        return labels[method] || method;
+      }
+
+      function formatDate(value) {
+        if (!value) {
+          return "Data non indicata";
+        }
+
+        const date = new Date(
+          String(value).length === 10 ? `${value}T12:00:00` : value
+        );
+
+        if (Number.isNaN(date.getTime())) {
+          return "Data non indicata";
+        }
+
+        return new Intl.DateTimeFormat("it-IT", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }).format(date);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+    })();
+  </script>
+</body>
+</html>
